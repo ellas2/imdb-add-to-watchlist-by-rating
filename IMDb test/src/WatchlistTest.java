@@ -17,11 +17,14 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import static org.junit.Assert.assertEquals;
 
+
+
 @TestMethodOrder(OrderAnnotation.class)
 public class WatchlistTest {
 	static WebDriver driver;
 	static String[] tvSeriesArr = null;
 	static float ratingValue = 0.0f;
+	
 	
 	@BeforeAll
 	/*
