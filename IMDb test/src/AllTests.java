@@ -14,9 +14,7 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
-
 import static org.junit.Assert.assertEquals;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,21 +28,16 @@ public class AllTests {
 	static String[] tvSeriesArr = null;
 	static float ratingValue = 0.0f;
 	
-	
-	
 	@BeforeAll
 	/*
 	 * Initialize the web driver and go to the IMDb home page
 	 */
 	public static void initDriver() {
-
-		
 		System.setProperty("webdriver.chrome.driver",".\\Driver\\chromedriver.exe");//Setting the driver executable
 		driver = new ChromeDriver();//Maximize window
 		driver.manage().window().maximize();
 		driver.get("https://www.imdb.com");//Open browser with desired URL
 	}
-	
 	
 	@Test
 	@Order(1)
@@ -81,7 +74,6 @@ public class AllTests {
         }
 	}
 
-	
 	@Test
 	@Order(2)
 	/*
@@ -102,9 +94,6 @@ public class AllTests {
 		//otherwise - user is logged in - nothing to be done at this point	
 	}
 
-
-	
-	
 	@Test
 	@Order(3)
 	/*
@@ -225,11 +214,8 @@ public class AllTests {
 		}
 	}
 	
-	
 	@AfterAll
 	public static void tearDown() {
 		driver.quit();
-	}
-	
-	
+	}	
 }
