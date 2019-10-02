@@ -26,6 +26,7 @@ public class WatchlistTest {
 	static float ratingValue = 0.0f;
 	
 	
+	
 	@BeforeAll
 	/*
 	 * Initialize the web driver and go to the IMDb home page
