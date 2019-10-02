@@ -53,8 +53,9 @@ public class AllTests {
             //Parse the rating into a float
             String ratingStr = (prop.getProperty("ratings").replaceAll("^\"|\"$", "")).trim();
             try {
-            	float rating = Float.parseFloat(ratingStr);
-            	if (rating < 1 || rating > 10) {
+            	ratingValue = Float.parseFloat(ratingStr);
+            	if (ratingValue < 1 || ratingValue > 10) {
+            		driver.quit();
             		System.out.println("Rating value provided in properties file is not in the range 1-10, terminating");
             		System.exit(1);
             	}
@@ -66,6 +67,7 @@ public class AllTests {
                 	tvSeriesArr[i] = tvSeriesArr[i].toLowerCase().replaceAll("^\"|\"$", "").trim();
                 }         
             }catch(NumberFormatException e){
+            	 driver.quit();
             	 System.out.println("Rating value provided in properties file is not a valid Float, terminating");
             	 System.exit(1);
             }
@@ -124,8 +126,9 @@ public class AllTests {
 			}
 			//this means that the string in the .properties file does not represent a TV Series in the IMDb DB
 			if (!found) {
-				System.out.println(tvSeriesArr[i] + "couldn't be found on IMDb");
+				System.out.println(tvSeriesArr[i] + " couldn't be found on IMDb");
 				tvSeriesArr[i] = ""; //marking the array so we don't check it later for this string
+				driver.findElement(By.id("navbar-query")).clear();
 				continue;
 			}
 			//check if the rating value is >= the rating value from the provided file
@@ -201,8 +204,6 @@ public class AllTests {
 				String linkText = driver.findElement(By.xpath(xpathExpression)).getText().toLowerCase();				
 				if (linkText.contains(tvSeriesArr[i]) || tvSeriesArr[i].contains(linkText)) {
 					found = true;
-					System.out.println("found in watchlist");
-					System.out.println(tvSeriesArr[i]);
 				}
 				index++;
 			}
