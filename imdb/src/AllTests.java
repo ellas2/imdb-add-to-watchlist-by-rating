@@ -12,6 +12,10 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+
+import static org.junit.Assert.assertEquals;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -20,22 +24,18 @@ import java.util.Arrays;
 import java.util.Properties;
 
 
-
-
-
-
-//@RunWith(Suite.class)
-//@SuiteClasses({})
+@TestMethodOrder(OrderAnnotation.class)
 public class AllTests {
 	static WebDriver driver;
-	static String[] tvShowsArr = null;
+	static String[] tvSeriesArr = null;
 	static float ratingValue = 0.0f;
 	
 	
-	/*
-	 * Intialize the web driver and go to the IMDb home page
-	 */
+	
 	@BeforeAll
+	/*
+	 * Initialize the web driver and go to the IMDb home page
+	 */
 	public static void initDriver() {
 		System.setProperty("webdriver.chrome.driver",".\\Driver\\chromedriver.exe");//Setting the driver executable
 		driver = new ChromeDriver();//Maximize window
@@ -43,24 +43,9 @@ public class AllTests {
 		driver.get("https://www.imdb.com");//Open browser with desired URL
 	}
 	
+	
 	@Test
 	@Order(1)
-	public void registration() {
-		if (driver.findElements(By.linkText("Sign in")).size() != 0) { //the user is not logged in 
-			String userName = "ella.steinberg93@gmail.com";
-			String password = "!Qaz2wsx";
-			driver.findElement(By.linkText("Sign in")).click();
-			driver.findElement(By.className("imdb-logo")).click();
-			driver.findElement(By.name("email")).sendKeys(userName);
-			driver.findElement(By.name("password")).clear();
-			driver.findElement(By.name("password")).sendKeys(password);
-			driver.findElement(By.id("signInSubmit")).click();
-		} 
-		//otherwise - user is logged in - nothing to be done at this point	
-	}
-
-	@Test
-	@Order(2)
 	/*
 	 * Loads properties file and parses it -
 	 * Creates an array of Strings (TV Series) 
@@ -81,9 +66,9 @@ public class AllTests {
             	//Parse the TV Series into an array of strings
                 String tvShows = prop.getProperty("tv"); //get a string of the format "tvshow1","tvshow2",...
                 String delims = ",";
-                tvShowsArr = tvShows.split(delims);
-                for (int i = 0; i < tvShowsArr.length; i++) {
-                	tvShowsArr[i] = tvShowsArr[i].toLowerCase().replaceAll("^\"|\"$", "").trim();
+                tvSeriesArr = tvShows.split(delims);
+                for (int i = 0; i < tvSeriesArr.length; i++) {
+                	tvSeriesArr[i] = tvSeriesArr[i].toLowerCase().replaceAll("^\"|\"$", "").trim();
                 }         
             }catch(NumberFormatException e){
             	 System.out.println("Rating value provided in properties file is not a valid Float, terminating");
@@ -93,6 +78,29 @@ public class AllTests {
             ex.printStackTrace();
         }
 	}
+
+	
+	@Test
+	@Order(2)
+	/*
+	 * Checks whether user is signed in
+	 * Otherwise - signs in with an IMDb account
+	 */
+	public void register() {
+		if (driver.findElements(By.linkText("Sign in")).size() != 0) { //the user is not logged in 
+			String userName = "ella.steinberg93@gmail.com";
+			String password = "!Qaz2wsx";
+			driver.findElement(By.linkText("Sign in")).click();
+			driver.findElement(By.className("imdb-logo")).click();
+			driver.findElement(By.name("email")).sendKeys(userName);
+			driver.findElement(By.name("password")).clear();
+			driver.findElement(By.name("password")).sendKeys(password);
+			driver.findElement(By.id("signInSubmit")).click();
+		} 
+		//otherwise - user is logged in - nothing to be done at this point	
+	}
+
+
 	
 	
 	@Test
@@ -101,9 +109,9 @@ public class AllTests {
 	 * Go over the list of tv shows and add the shows with rating >= ratingValue to watching list
 	 */
 	public void addToWatchlist() {
-		for(int i = 0; i < tvShowsArr.length; i++) {
+		for(int i = 0; i < tvSeriesArr.length; i++) {
 			//enter the name from the array in the main search bar
-			driver.findElement(By.id("navbar-query")).sendKeys(tvShowsArr[i]);
+			driver.findElement(By.id("navbar-query")).sendKeys(tvSeriesArr[i]);
 			driver.findElement(By.className("magnifyingglass")).click();
 			//find the number of expected results - so we'll know when to stop
 			int iCount = driver.findElements(By.xpath("//div/table/tbody//*[@class='result_text']")).size();			
@@ -115,7 +123,7 @@ public class AllTests {
 			while (!found && index <= iCount){
 				String xpathExpression = "(//div/table/tbody//*[@class='result_text'])[" + Integer.toString(index) + "]";
 				str = driver.findElement(By.xpath(xpathExpression)).getText().toLowerCase();
-				if (str.contains((tvShowsArr[i])) && (str.contains(("TV Series").toLowerCase()) ||
+				if (str.contains((tvSeriesArr[i])) && (str.contains(("TV Series").toLowerCase()) ||
 						str.contains(("TV Mini-Series").toLowerCase()))) {
 					found = true;
 					String xpathExpressionLink = "(//div/table/tbody//*[@class='result_text']/a)[" + Integer.toString(index) + "]";
@@ -125,7 +133,8 @@ public class AllTests {
 			}
 			//this means that the string in the .properties file does not represent a TV Series in the IMDb DB
 			if (!found) {
-				tvShowsArr[i] = ""; //marking the array so we don't check it later for this string
+				System.out.println(tvSeriesArr[i] + "couldn't be found on IMDb");
+				tvSeriesArr[i] = ""; //marking the array so we don't check it later for this string
 				continue;
 			}
 			//check if the rating value is >= the rating value from the provided file
@@ -142,7 +151,7 @@ public class AllTests {
 				}
 			} 
 			else {
-				tvShowsArr[i] = ""; //marking the array so we don't check it later for this string
+				tvSeriesArr[i] = ""; //marking the array so we don't check it later for this string
 			}
 		}
 	}
@@ -176,8 +185,8 @@ public class AllTests {
 		}
 		//for every tv show in our array - 
 		//go over the watchlist and look for it - stop when found
-		for(int i = tvShowsArr.length-1; i >= 0; i--) {			
-			if (tvShowsArr[i].isEmpty()) { //this means the show rating was lower or the string is not of a tv show
+		for(int i = 0; i < tvSeriesArr.length; i++) {			
+			if (tvSeriesArr[i].isEmpty()) { //this means the show rating was lower or the string is not of a tv show
 				continue;
 			}
 			//look for the tv show in the watchlist
@@ -195,21 +204,22 @@ public class AllTests {
 					}
 					loadMoreInd = indexInLoadArr;
 				}
-				
 				String xpathExpression = "(//div//*[@class='lister-item-header']/a)[" + Integer.toString(index) + "]";
 				WebDriverWait waity = new WebDriverWait(driver, 20);
 				waity.until(ExpectedConditions.elementToBeClickable(By.xpath(xpathExpression)));
 				String linkText = driver.findElement(By.xpath(xpathExpression)).getText().toLowerCase();				
-				if (linkText.contains(tvShowsArr[i]) || tvShowsArr[i].contains(linkText)) {
+				if (linkText.contains(tvSeriesArr[i]) || tvSeriesArr[i].contains(linkText)) {
 					found = true;
 					//System.out.println("found in watchlist");
-					//System.out.println(tvShowsArr[i]);
+					//System.out.println(tvSeriesArr[i]);
 				}
 				index++;
 			}
 			if (!found) {
-				System.out.println("TV Series: " + tvShowsArr[i] + " Couldn't be found");
-			}			
+				System.out.println("TV Series: " + tvSeriesArr[i] + " Couldn't be found");
+			}
+			assertEquals(found, true);
+			
 		}
 	}
 	
